@@ -1,7 +1,6 @@
+//use crate::error::{Error, Result};
+use poem::{error::BadRequest, handler, http::StatusCode, web::Query, Result};
 use std::collections::HashMap;
-
-use poem::{handler, http::StatusCode, web::Query, Result};
-use serde_json::json;
 use uuid::Uuid;
 
 use crate::configuration::get_configuration;
@@ -13,14 +12,20 @@ pub struct SsoLoginCallbackParam {
     pub state: String,
 }
 
-#[tracing:: instrument(
-    name = "sso callback",
-    fields(request_id = %Uuid::new_v4())
-)]
+#[derive(Deserialize, Debug)]
+struct SsoTokenResponse {
+    access_token: String,
+    id_token: String,
+    refresh_token: String,
+    token_type: String,
+    expires_in: usize,
+    scope: String,
+}
+
 #[handler]
 pub async fn sso_cb(
     Query(SsoLoginCallbackParam { code, state }): Query<SsoLoginCallbackParam>,
-) -> StatusCode {
+) -> Result<StatusCode> {
     println!("code: {}, state: {}", code, state);
     let client = reqwest::Client::new();
     let setting = get_configuration().unwrap();
@@ -31,14 +36,17 @@ pub async fn sso_cb(
     map.insert("client_secret", &setting.sso.client_secret);
     map.insert("code", &code);
 
-    let resp = client
+    let token_res = client
         .post("https://sso.codegene.xyz/api/login/oauth/access_token")
         .json(&map)
         .send()
         .await
-        .unwrap();
+        .map_err(BadRequest)?
+        .json::<SsoTokenResponse>()
+        .await
+        .map_err(BadRequest)?;
 
-    println!("sso response: {:?}", resp);
+    println!("sso response: {:?}", token_res);
 
-    StatusCode::OK
+    Ok(StatusCode::OK)
 }
