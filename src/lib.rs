@@ -64,7 +64,7 @@ fn app(pg_pool: PgPool) -> impl Endpoint {
             "/api/spec",
             poem::endpoint::make_sync(move |_| spec.clone()),
         )
-        .nest("/sso/cb", post(handlers::user::sso_cb))
+        .nest("/sso/cb", handlers::user::sso_cb)
         .nest("/health_check", handlers::health_check)
         .nest(
             "/",
