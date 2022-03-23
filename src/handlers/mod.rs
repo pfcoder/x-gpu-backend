@@ -2,6 +2,8 @@
 use poem::{handler, http::StatusCode, Result};
 use uuid::Uuid;
 
+pub mod user;
+
 #[tracing:: instrument(
     name = "health check",
     fields(request_id = %Uuid::new_v4())

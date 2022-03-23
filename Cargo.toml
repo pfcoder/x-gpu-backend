@@ -17,7 +17,7 @@ hyper = "0.14.16"
 jsonwebtoken = "7.2"
 jwt = "0.15.0"
 lazy_static = "1.4"
-poem = { version = "1.3.16", features = ["tower-compat", "compression", "cookie", "session"] }
+poem = { version = "1.3.16", features = ["tower-compat", "compression", "cookie", "session", "static-files"] }
 poem-openapi = { version = "1.3.16", features = ["swagger-ui"] }
 rayon = "1.5"
 secrecy = { version = "0.8", features = ["serde"] }

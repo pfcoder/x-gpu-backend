@@ -9,6 +9,8 @@ pub struct Settings {
     pub database: DatabaseSettings,
     pub server: ServerSettings,
     pub security: SecuritySettings,
+    pub front_path: String,
+    pub sso: Sso,
 }
 
 #[derive(serde::Deserialize)]
@@ -32,6 +34,12 @@ pub struct DatabaseSettings {
 #[derive(serde::Deserialize)]
 pub struct SecuritySettings {
     pub jwt_secret: Secret<String>,
+}
+
+#[derive(serde::Deserialize)]
+pub struct Sso {
+    pub client_id: String,
+    pub client_secret: String,
 }
 
 impl DatabaseSettings {

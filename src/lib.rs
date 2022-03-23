@@ -4,20 +4,19 @@ extern crate lazy_static;
 extern crate serde;
 
 use futures::Future;
-use hyper;
 use sqlx::PgPool;
-use tower::ServiceBuilder;
-use tower_http::{cors::CorsLayer, trace::TraceLayer};
 
 use poem::{
-    error::InternalServerError, listener::TcpListener, middleware::Cors, web::Data, Endpoint,
-    EndpointExt, Result, Route, Server,
+    endpoint::StaticFilesEndpoint, listener::TcpListener, middleware::Cors, post, web::Data,
+    Endpoint, EndpointExt, Result, Route, Server,
 };
 use poem_openapi::{
     param::Path,
     payload::{Json, PlainText},
     ApiResponse, Object, OpenApi, OpenApiService,
 };
+
+use crate::configuration::get_configuration;
 
 mod api;
 pub mod configuration;
@@ -59,9 +58,19 @@ fn app(pg_pool: PgPool) -> impl Endpoint {
     let ui = api_service.swagger_ui();
     let spec = api_service.spec();
     Route::new()
-        .nest("/", api_service)
-        .nest("/ui", ui)
-        .at("/spec", poem::endpoint::make_sync(move |_| spec.clone()))
+        .nest("/api", api_service)
+        .nest("/api/ui", ui)
+        .nest(
+            "/api/spec",
+            poem::endpoint::make_sync(move |_| spec.clone()),
+        )
+        .nest("/sso/cb", post(handlers::user::sso_cb))
+        .nest("/health_check", handlers::health_check)
+        .nest(
+            "/",
+            StaticFilesEndpoint::new(get_configuration().unwrap().front_path)
+                .index_file("index.html"),
+        )
         .with(Cors::new())
         .data(pg_pool)
 }
