@@ -21,6 +21,7 @@ impl User {
             ",
             User::TABLE
         );
+        tracing::info!("create user sql: {}", sql);
         Ok(sqlx::query_as(&sql)
             .bind(data.id)
             .bind(data.access_token)
