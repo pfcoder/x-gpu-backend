@@ -7,7 +7,12 @@ use futures::Future;
 use sqlx::PgPool;
 
 use poem::{
-    endpoint::StaticFilesEndpoint, listener::TcpListener, middleware::Cors, post, web::Data,
+    endpoint::StaticFilesEndpoint,
+    listener::TcpListener,
+    middleware::Cors,
+    post,
+    session::{CookieConfig, CookieSession},
+    web::Data,
     Endpoint, EndpointExt, Result, Route, Server,
 };
 use poem_openapi::{
@@ -72,6 +77,7 @@ fn app(pg_pool: PgPool) -> impl Endpoint {
                 .index_file("index.html"),
         )
         .with(Cors::new())
+        .with(CookieSession::new(CookieConfig::default().secure(false)))
         .data(pg_pool)
 }
 

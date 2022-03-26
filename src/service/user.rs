@@ -11,7 +11,7 @@ use crate::{
 pub struct AuthService;
 
 impl AuthService {
-    pub async fn sign_in(input: LoginInput, pool: &PgPool) -> Result<User> {
+    /*pub async fn sign_in(input: LoginInput, pool: &PgPool) -> Result<User> {
         let user = User::find_by_email(&input.email, &pool).await?;
         if encryption::verify_password(input.password, user.password.to_owned()).await? {
             Ok(user)
@@ -35,6 +35,14 @@ impl AuthService {
             created_at: Utc::now(),
             updated_at: Utc::now(),
         };
+        Ok(User::create(data, &pool).await?)
+    }*/
+}
+
+pub struct UserService;
+
+impl UserService {
+    pub async fn create(pool: &PgPool, data: CreateUserData) -> Result<User> {
         Ok(User::create(data, &pool).await?)
     }
 }

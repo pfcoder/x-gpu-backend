@@ -1,15 +1,12 @@
 use chrono::{DateTime, Utc};
 use sqlx::FromRow;
-use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, Clone, FromRow)]
 pub struct User {
-    #[serde(skip_serializing)]
-    pub id: Uuid,
-    pub name: String,
-    pub email: String,
-    #[serde(skip_serializing)]
-    pub password: String,
+    pub id: String,
+    pub access_token: String,
+    pub refresh_token: String,
+    pub expires_at: DateTime<Utc>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -20,9 +17,10 @@ impl User {
 
 #[derive(Debug)]
 pub struct CreateUserData {
-    pub name: String,
-    pub email: String,
-    pub password: String,
+    pub id: String,
+    pub access_token: String,
+    pub refresh_token: String,
+    pub expires_at: DateTime<Utc>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
