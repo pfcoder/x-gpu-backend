@@ -1,8 +1,8 @@
 //use crate::error::{Error, Result};
 use chrono::{Duration, Utc};
 use poem::{
-    error::BadRequest, handler, http::StatusCode, session::Session, web::Data, web::Query, Request,
-    Result,
+    error::BadRequest, handler, http::StatusCode, http::Uri, session::Session, web::Data,
+    web::Query, web::Redirect, Request, Result,
 };
 use sqlx::PgPool;
 use std::collections::HashMap;
@@ -42,7 +42,7 @@ pub async fn sso_cb(
     session: &Session,
     pool: Data<&PgPool>,
     Query(SsoLoginCallbackParam { code, state }): Query<SsoLoginCallbackParam>,
-) -> Result<StatusCode> {
+) -> Result<Redirect> {
     println!("code: {}, state: {}", code, state);
     let client = reqwest::Client::new();
     let setting = get_configuration().unwrap();
@@ -95,8 +95,11 @@ pub async fn sso_cb(
     // give user back access token, mark as logged in, update cookie
     let token = sign(Uuid::parse_str(&user_info.sub).map_err(BadRequest)?).map_err(BadRequest)?;
 
-    session.set("Authorization", format!("Bearer {}", token));
-    tracing::info!("new jwt token: {:?}", token);
+    session.set("Authorization", token);
+    //tracing::info!("new jwt token: {:?}", token);
+    // redirect to home
 
-    Ok(StatusCode::OK)
+    Ok(Redirect::see_other(Uri::from_static(
+        "https://cloud.codegene.xyz/",
+    )))
 }
