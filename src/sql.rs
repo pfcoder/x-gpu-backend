@@ -12,11 +12,11 @@ impl User {
     }
 
     pub async fn create(data: CreateUserData, pool: &PgPool) -> Result<User> {
+        // ON CONFLICT id DO UPDATE SET access_token = $2, refresh_token = $3, expires_at = $4, updated_at = $6
         let sql = format!(
             "
             INSERT INTO {} (id, access_token, refresh_token, expires_at, created_at, updated_at)
             VALUES ($1, $2, $3, $4, $5, $6)
-            ON CONFLICT id DO UPDATE SET access_token = $2, refresh_token = $3, expires_at = $4, updated_at = $6
             RETURNING *
             ",
             User::TABLE
