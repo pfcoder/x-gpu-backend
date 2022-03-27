@@ -38,7 +38,7 @@ impl User {
         let sql = format!(
             "
             UPDATE {}
-            SET access_token = $2, refresh_token = $3, expires_at = $4, updated_at = $6
+            SET access_token = $2, refresh_token = $3, expires_at = $4, updated_at = $5
             WHERE id = $1
             RETURNING *
             ",
