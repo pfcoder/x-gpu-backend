@@ -4,7 +4,7 @@ use sqlx::PgPool;
 use crate::{
     dto::{LoginInput, RegisterInput},
     error::{Error, Result},
-    model::{CreateUserData, User},
+    model::{CreateUserData, UpdateUserData, User},
     utils::encryption,
 };
 
@@ -44,5 +44,13 @@ pub struct UserService;
 impl UserService {
     pub async fn create(pool: &PgPool, data: CreateUserData) -> Result<User> {
         Ok(User::create(data, &pool).await?)
+    }
+
+    pub async fn find_by_id(pool: &PgPool, id: uuid::Uuid) -> Result<User> {
+        Ok(User::find_by_id(id, &pool).await?)
+    }
+
+    pub async fn update(pool: &PgPool, id: uuid::Uuid, data: UpdateUserData) -> Result<User> {
+        Ok(User::update(id, data, &pool).await?)
     }
 }

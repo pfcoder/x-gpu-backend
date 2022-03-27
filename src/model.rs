@@ -1,9 +1,10 @@
 use chrono::{DateTime, Utc};
 use sqlx::FromRow;
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, Clone, FromRow)]
 pub struct User {
-    pub id: String,
+    pub id: Uuid,
     pub access_token: String,
     pub refresh_token: String,
     pub expires_at: DateTime<Utc>,
@@ -17,10 +18,18 @@ impl User {
 
 #[derive(Debug)]
 pub struct CreateUserData {
-    pub id: String,
+    pub id: Uuid,
     pub access_token: String,
     pub refresh_token: String,
     pub expires_at: DateTime<Utc>,
     pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug)]
+pub struct UpdateUserData {
+    pub access_token: String,
+    pub refresh_token: String,
+    pub expires_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }

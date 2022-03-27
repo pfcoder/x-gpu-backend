@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use uuid::Uuid;
 
 use crate::configuration::get_configuration;
-use crate::model::CreateUserData;
+use crate::model::{CreateUserData, UpdateUserData};
 use crate::service::user::UserService;
 use crate::utils::jwt::sign;
 use serde::Deserialize;
@@ -77,23 +77,47 @@ pub async fn sso_cb(
     tracing::info!("user info: {:?}", user_info);
 
     // check if user exists, update db
-    // if not, create user
-    UserService::create(
-        pool.0,
-        CreateUserData {
-            id: user_info.sub.clone(),
-            access_token: token_res.access_token,
-            refresh_token: token_res.refresh_token,
-            expires_at: Utc::now() + Duration::seconds(token_res.expires_in as i64),
-            created_at: Utc::now(),
-            updated_at: Utc::now(),
-        },
-    )
-    .await
-    .map_err(BadRequest)?;
+    let uuid = Uuid::parse_str(&user_info.sub).map_err(BadRequest)?;
+    let expires_at = Utc::now() + Duration::seconds(token_res.expires_in as i64);
+
+    match UserService::find_by_id(pool.0, uuid).await {
+        Ok(user) => {
+            tracing::info!("user exists: {:?}", user);
+            let user = UserService::update(
+                pool.0,
+                uuid,
+                UpdateUserData {
+                    access_token: token_res.access_token,
+                    refresh_token: token_res.refresh_token,
+                    expires_at: expires_at,
+                    updated_at: Utc::now(),
+                },
+            )
+            .await
+            .map_err(BadRequest)?;
+            tracing::info!("user updated: {:?}", user);
+        }
+        Err(e) => {
+            tracing::info!("user not exists: {:?}", e);
+            let user = UserService::create(
+                pool.0,
+                CreateUserData {
+                    id: uuid,
+                    access_token: token_res.access_token,
+                    refresh_token: token_res.refresh_token,
+                    expires_at: expires_at,
+                    created_at: Utc::now(),
+                    updated_at: Utc::now(),
+                },
+            )
+            .await
+            .map_err(BadRequest)?;
+            tracing::info!("user created: {:?}", user);
+        }
+    }
 
     // give user back access token, mark as logged in, update cookie
-    let token = sign(Uuid::parse_str(&user_info.sub).map_err(BadRequest)?).map_err(BadRequest)?;
+    let token = sign(uuid).map_err(BadRequest)?;
 
     session.set("Authorization", token);
     //tracing::info!("new jwt token: {:?}", token);
