@@ -97,8 +97,7 @@ pub async fn sso_cb(
 
     session.set("Authorization", token);
     //tracing::info!("new jwt token: {:?}", token);
-    // redirect to home
-
+    // redirect to home with session cookie
     Ok(Redirect::see_other(Uri::from_static(
         "https://cloud.codegene.xyz/",
     )))
