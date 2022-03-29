@@ -123,7 +123,7 @@ pub async fn sso_cb(
     //session.
     //tracing::info!("new jwt token: {:?}", token);
     // redirect to home with session cookie
-    let redirect_url: Uri = format!("https://{}/?token={}", setting.server.domain, token)
+    let redirect_url: Uri = format!("https://{}/#/?token={}", setting.server.domain, token)
         .parse()
         .unwrap();
     Ok(Redirect::see_other(redirect_url))
