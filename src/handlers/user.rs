@@ -119,10 +119,12 @@ pub async fn sso_cb(
     // give user back access token, mark as logged in, update cookie
     let token = sign(uuid).map_err(BadRequest)?;
 
-    session.set("Authorization", token);
+    //session.set("Authorization", token);
+    //session.
     //tracing::info!("new jwt token: {:?}", token);
     // redirect to home with session cookie
-    Ok(Redirect::see_other(Uri::from_static(
-        "https://cloud.codegene.xyz/",
-    )))
+    let redirect_url: Uri = format!("https://{}/?token={}", setting.server.domain, token)
+        .parse()
+        .unwrap();
+    Ok(Redirect::see_other(redirect_url))
 }
