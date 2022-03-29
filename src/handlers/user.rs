@@ -126,5 +126,6 @@ pub async fn sso_cb(
     let redirect_url: Uri = format!("https://{}/#/?token={}", setting.server.domain, token)
         .parse()
         .unwrap();
+    tracing::info!("redirect url: {:?}", redirect_url);
     Ok(Redirect::see_other(redirect_url))
 }
